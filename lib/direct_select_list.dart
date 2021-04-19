@@ -23,7 +23,7 @@ typedef ItemSelected = Future<dynamic> Function(
 ///
 class DirectSelectList<T> extends StatefulWidget {
   ///Item widgets
-  final List<DirectSelectItem<T>> items;
+  final List<DirectSelectItem<T>?> items;
 
   ///Current focused item overlay
   final Decoration? focusedItemDecoration;
@@ -35,7 +35,7 @@ class DirectSelectList<T> extends StatefulWidget {
   final ValueNotifier<int> selectedItem;
 
   ///Function to execute when item selected
-  final Function(T value, int selectedIndex, BuildContext context)?
+  final Function(T? value, int selectedIndex, BuildContext context)?
       onItemSelectedListener;
 
   ///Callback for action when user just tapped instead of hold and scroll
@@ -52,8 +52,7 @@ class DirectSelectList<T> extends StatefulWidget {
     this.focusedItemDecoration,
     this.defaultItemIndex = 0,
     this.onUserTappedListener,
-  })  : items = values.map((val) => itemBuilder(val)).toList()
-            as List<DirectSelectItem<T>>,
+  })  : items = values.map((val) => itemBuilder(val)).toList(),
         selectedItem = ValueNotifier<int>(defaultItemIndex),
         assert(defaultItemIndex + 1 <= values.length + 1),
         super(key: key);
@@ -66,7 +65,7 @@ class DirectSelectList<T> extends StatefulWidget {
   //TODO pass item height in this class and build items with that height
   double itemHeight() {
     if (items.isNotEmpty) {
-      return items.first.itemHeight;
+      return items.first?.itemHeight ?? 0.0;
     }
     return 0.0;
   }
@@ -81,8 +80,8 @@ class DirectSelectList<T> extends StatefulWidget {
     }
   }
 
-  T getSelectedItem() {
-    return items[selectedItem.value].value;
+  T? getSelectedItem() {
+    return items[selectedItem.value]?.value;
   }
 }
 
@@ -91,7 +90,7 @@ class DirectSelectState<T> extends State<DirectSelectList<T>> {
       GlobalKey<DirectSelectItemState>();
 
   late Future Function(DirectSelectList, double) onTapEventListener;
-  late void Function(double?) onDragEventListener;
+  late void Function(double) onDragEventListener;
 
   bool isOverlayVisible = false;
   int? lastSelectedItem;
@@ -120,10 +119,12 @@ class DirectSelectState<T> extends State<DirectSelectList<T>> {
     for (int index = 0; index < widget.items.length; index++) {
       selectedItemWidgets.putIfAbsent(
         index,
-        () => widget.items[index].getSelectedItem(
-          animatedStateKey,
-          widget.paddingItemController.paddingGlobalKey,
-        ),
+        () =>
+            widget.items[index]?.getSelectedItem(
+              animatedStateKey,
+              widget.paddingItemController.paddingGlobalKey,
+            ) ??
+            Container(),
       );
     }
   }
@@ -135,8 +136,7 @@ class DirectSelectState<T> extends State<DirectSelectList<T>> {
 
     this.onTapEventListener = dsListener.toggleListOverlayVisibility
         as Future<dynamic> Function(DirectSelectList<dynamic>, double);
-    this.onDragEventListener =
-        dsListener.performListDrag as void Function(double?);
+    this.onDragEventListener = dsListener.performListDrag;
   }
 
   @override
@@ -144,7 +144,7 @@ class DirectSelectState<T> extends State<DirectSelectList<T>> {
     widget.selectedItem.addListener(() {
       if (widget.onItemSelectedListener != null) {
         widget.onItemSelectedListener?.call(
-            widget.items[widget.selectedItem.value].value,
+            widget.items[widget.selectedItem.value]?.value,
             widget.selectedItem.value,
             this.context);
       }
@@ -224,7 +224,7 @@ class DirectSelectState<T> extends State<DirectSelectList<T>> {
       isOverlayVisible = true;
       onTapEventListener(widget, _getItemTopPosition(context));
     } else {
-      onDragEventListener(dy);
+      onDragEventListener(dy ?? 0.0);
     }
   }
 }

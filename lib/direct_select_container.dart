@@ -202,11 +202,11 @@ class DirectSelectContainerState extends State<DirectSelectContainer>
             final item = _currentList.items[index - 1];
             final normalScale = 1.0;
             if (lastSelectedItem == index - 1) {
-              item.updateScale(_calculateNewScale(normalScale));
+              item?.updateScale(_calculateNewScale(normalScale));
             } else {
-              item.updateScale(normalScale);
+              item?.updateScale(normalScale);
             }
-            return item;
+            return item ?? Container();
           },
         ));
   }
@@ -275,17 +275,17 @@ class DirectSelectContainerState extends State<DirectSelectContainer>
       //incorrect neighbour index quit
       return;
     }
-    _currentList.items[selectedItemIndex].updateOpacity(1.0);
-    _currentList.items[neighbourIndex].updateOpacity(0.5);
+    _currentList.items[selectedItemIndex]?.updateOpacity(1.0);
+    _currentList.items[neighbourIndex]?.updateOpacity(0.5);
 
     _currentList.items[selectedItemIndex]
-        .updateScale(_calculateNewScale(neighbourDistanceToCurrentItem));
+        ?.updateScale(_calculateNewScale(neighbourDistanceToCurrentItem));
     _currentList.items[neighbourIndex]
-        .updateScale(_calculateNewScale(neighbourDistance.abs()));
+        ?.updateScale(_calculateNewScale(neighbourDistance.abs()));
   }
 
   double _calculateNewScale(double distance) =>
-      1.0 + distance / _currentList.items[lastSelectedItem].scaleFactor;
+      1.0 + distance / _currentList.items[lastSelectedItem]?.scaleFactor;
 
   int neighbourScrollDirection(double neighbourDistance) {
     int neighbourScrollDirection = 0;
@@ -358,14 +358,14 @@ class DirectSelectContainerState extends State<DirectSelectContainer>
     _currentList = visibleList;
     _currentScrollLocation = location;
     lastSelectedItem = _currentList.getSelectedItemIndex();
-    _currentList.items[lastSelectedItem].updateOpacity(1.0);
+    _currentList.items[lastSelectedItem]?.updateOpacity(1.0);
     isOverlayVisible = true;
     await fadeAnimationController.forward(from: 0.0);
   }
 
   void _hideListOverlay() {
     _scrollController.dispose();
-    _currentList.items[lastSelectedItem].updateScale(1.0);
+    _currentList.items[lastSelectedItem]?.updateScale(1.0);
     _currentScrollLocation = 0;
     _adjustedTopOffset = 0;
     isOverlayVisible = false;
